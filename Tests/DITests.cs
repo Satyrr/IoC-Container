@@ -59,7 +59,7 @@ namespace Tests
         public void InterfaceInstanceCreationExceptionTest()
         {
             SimpleContainer container = new SimpleContainer();
-
+            
             Assert.Throws<InvalidResolveTypeException>(() => {
                 IFoo f1 = container.Resolve<IFoo>();
             });
