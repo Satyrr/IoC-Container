@@ -23,4 +23,21 @@ namespace DIContainer
             throw new NotImplementedException();
         }
     }
+
+    public class InvalidResolveTypeException : Exception
+    {
+        public InvalidResolveTypeException()
+        {
+        }
+
+        public InvalidResolveTypeException(string message)
+            : base(message)
+        {
+        }
+
+        public InvalidResolveTypeException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
+    }
 }

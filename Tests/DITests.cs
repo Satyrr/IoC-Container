@@ -45,11 +45,71 @@ namespace Tests
             Assert.IsInstanceOf<Foo>(f1);
         }
 
+        [Test]
+        public void ClassInstanceCreationNoExceptionTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            Assert.DoesNotThrow(() => {
+                    Foo f1 = container.Resolve<Foo>();
+                });
+        }
+
+        [Test]
+        public void InterfaceInstanceCreationExceptionTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            Assert.Throws<InvalidResolveTypeException>(() => {
+                IFoo f1 = container.Resolve<IFoo>();
+            });
+        }
+
+        [Test]
+        public void SingletonFromToInstanceCreationTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            container.RegisterType<IFoo, Foo>(true);
+
+            IFoo f1 = container.Resolve<IFoo>();
+            IFoo f2 = container.Resolve<IFoo>();
+
+            Assert.AreSame(f1, f2);
+        }
+
+        [Test]
+        public void NoSingletonFromToInstanceCreationTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            container.RegisterType<IFoo, Foo>(false);
+
+            IFoo f1 = container.Resolve<IFoo>();
+            IFoo f2 = container.Resolve<IFoo>();
+
+            Assert.AreNotSame(f1, f2);
+        }
+
+        [Test]
+        public void FromToInstanceCreationTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            container.RegisterType<IFoo, Foo>(false);
+
+            var f1 = container.Resolve<IFoo>();
+
+            Assert.IsInstanceOf<Foo>(f1);
+        }
     }
 
+    interface IFoo
+    {
 
+    }
 
-    class Foo
+    class Foo : IFoo
     {
 
     }
