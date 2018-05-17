@@ -6,14 +6,24 @@ using System.Threading.Tasks;
 
 namespace DIContainer
 {
-
-    
-
     public class SimpleContainer
     {
         interface IInstanceCreator
         {
             object GetInstance();
+        }
+
+        class InstanceCreator : IInstanceCreator
+        {
+            Type _type;
+            public InstanceCreator(Type type)
+            {
+                _type = type;
+            }
+            public object GetInstance()
+            {
+                return Activator.CreateInstance(_type);
+            }
         }
 
         class SingletonInstanceCreator : IInstanceCreator
@@ -35,26 +45,26 @@ namespace DIContainer
         public void RegisterType<T>(bool Singleton) where T : class
         {
             if(Singleton)
-            {
                 _registeredTypes[typeof(T)] = new SingletonInstanceCreator(typeof(T));
-            }
         }
 
-        public void RegisterType<From, To>(bool Singleton) where To : From
+        public void RegisterType<From, To>(bool Singleton) where To : class, From
         {
-            throw new NotImplementedException();
+            if (Singleton)
+                _registeredTypes[typeof(From)] = new SingletonInstanceCreator(typeof(To));
+            else
+                _registeredTypes[typeof(From)] = new InstanceCreator(typeof(To));
         }
 
         public T Resolve<T>()
-        {
+        {   
             if(_registeredTypes.ContainsKey(typeof(T)))
             {
                 return (T)_registeredTypes[typeof(T)].GetInstance();
             }
-
+            if (typeof(T).IsInterface)
+                throw new InvalidResolveTypeException("This type of interface has not been registered.");
             return (T)Activator.CreateInstance(typeof(T)); 
-
-            throw new NotImplementedException();
         }
     }
 
