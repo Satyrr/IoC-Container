@@ -51,15 +51,15 @@ namespace Tests
             SimpleContainer container = new SimpleContainer();
 
             Assert.DoesNotThrow(() => {
-                    Foo f1 = container.Resolve<Foo>();
-                });
+                Foo f1 = container.Resolve<Foo>();
+            });
         }
 
         [Test]
         public void InterfaceInstanceCreationExceptionTest()
         {
             SimpleContainer container = new SimpleContainer();
-            
+
             Assert.Throws<InvalidResolveTypeException>(() => {
                 IFoo f1 = container.Resolve<IFoo>();
             });
@@ -106,21 +106,70 @@ namespace Tests
         [Test]
         public void RegisteredInstanceCreationTest()
         {
-            SimpleContainer c = new SimpleContainer();
+            SimpleContainer container = new SimpleContainer();
             IFoo f1 = new Foo();
-            c.RegisterInstance<IFoo>(f1);
-            IFoo f2 = c.Resolve<IFoo>();
+            container.RegisterInstance<IFoo>(f1);
+            IFoo f2 = container.Resolve<IFoo>();
             Assert.AreSame(f1, f2);
+        }
+
+        [Test]
+        public void RecurrentResolvingSimpleTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+            A a = container.Resolve<A>();
+            Assert.NotNull(a.b);
+        }
+
+        [Test]
+        public void RecurrentResolvingStringExceptionTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+           
+            Assert.Throws<InvalidResolveTypeException>(() => {
+                X x = container.Resolve<X>();
+            });
+        }        [Test]
+        public void RecurrentResolvingStringNoExceptionTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+            container.RegisterInstance("ala ma kota"); 
+            Assert.DoesNotThrow(() => {
+                X x = container.Resolve<X>();
+            });
+        }
+        [Test]
+        public void RecurrentResolvingCycleExceptionTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            Assert.Throws<InvalidResolveTypeException>(() => {
+                Z z = container.Resolve<Z>();
+            });
         }
     }
 
-    interface IFoo
-    {
+    interface IFoo { }
 
+    class Foo : IFoo { }
+
+    public class A
+    {
+        public B b;
+        public A(B b)
+        {
+            this.b = b;
+        }
     }
-
-    class Foo : IFoo
+    public class B { }
+    public class X
     {
+        public X(Y d, string s) { }
+    }
+    public class Y { }
 
+    public class Z
+    {
+        public Z(Z z) { }
     }
 }
