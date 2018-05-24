@@ -113,7 +113,7 @@ namespace DIContainer
                     constructors.Max(x => x.GetParameters().Count()));
             if (maxConstructors.Count() > 1)
                 throw new Exception("There is more than one constructor with the maximum number of parameters.");
-            var constructor = maxConstructors.First();
+            ConstructorInfo constructor = maxConstructors.First();
 
             return InvokeConstructor(type, constructor, resolvedTypes);
         }
