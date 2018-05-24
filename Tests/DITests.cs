@@ -102,6 +102,16 @@ namespace Tests
 
             Assert.IsInstanceOf<Foo>(f1);
         }
+
+        [Test]
+        public void RegisteredInstanceCreationTest()
+        {
+            SimpleContainer c = new SimpleContainer();
+            IFoo f1 = new Foo();
+            c.RegisterInstance<IFoo>(f1);
+            IFoo f2 = c.Resolve<IFoo>();
+            Assert.AreSame(f1, f2);
+        }
     }
 
     interface IFoo

@@ -8,15 +8,28 @@ namespace DIContainer
 {
     public class SimpleContainer
     {
-        interface IInstanceCreator
+        interface IInstanceGetter
         {
             object GetInstance();
         }
 
-        class InstanceCreator : IInstanceCreator
+        class RegisteredInstanceGetter : IInstanceGetter
+        {
+            object _instance;
+            public RegisteredInstanceGetter(object instance)
+            {
+                _instance = instance;
+            }
+            public object GetInstance()
+            {
+                return _instance;
+            }
+        }
+
+        class BasicInstanceGetter : IInstanceGetter
         {
             Type _type;
-            public InstanceCreator(Type type)
+            public BasicInstanceGetter(Type type)
             {
                 _type = type;
             }
@@ -26,10 +39,10 @@ namespace DIContainer
             }
         }
 
-        class SingletonInstanceCreator : IInstanceCreator
+        class SingletonInstanceGetter : IInstanceGetter
         {
             object _instance;
-            public SingletonInstanceCreator(Type type)
+            public SingletonInstanceGetter(Type type)
             {
                this._instance = Activator.CreateInstance(type);
             }
@@ -40,20 +53,25 @@ namespace DIContainer
             }
         }
 
-        Dictionary<Type, IInstanceCreator> _registeredTypes = new Dictionary<Type, IInstanceCreator>();
+        Dictionary<Type, IInstanceGetter> _registeredTypes = new Dictionary<Type, IInstanceGetter>();
 
         public void RegisterType<T>(bool Singleton) where T : class
         {
             if(Singleton)
-                _registeredTypes[typeof(T)] = new SingletonInstanceCreator(typeof(T));
+                _registeredTypes[typeof(T)] = new SingletonInstanceGetter(typeof(T));
         }
 
         public void RegisterType<From, To>(bool Singleton) where To : class, From
         {
             if (Singleton)
-                _registeredTypes[typeof(From)] = new SingletonInstanceCreator(typeof(To));
+                _registeredTypes[typeof(From)] = new SingletonInstanceGetter(typeof(To));
             else
-                _registeredTypes[typeof(From)] = new InstanceCreator(typeof(To));
+                _registeredTypes[typeof(From)] = new BasicInstanceGetter(typeof(To));
+        }
+
+        public void RegisterInstance<T>(T Instance)
+        {
+            _registeredTypes[typeof(T)] = new RegisteredInstanceGetter(Instance);
         }
 
         public T Resolve<T>()
