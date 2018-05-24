@@ -147,6 +147,36 @@ namespace Tests
                 Z z = container.Resolve<Z>();
             });
         }
+
+        [Test]
+        public void DependencyConstructorAttributeTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            Assert.DoesNotThrow(() => {
+                Bar b = container.Resolve<Bar>();
+            });
+        }
+
+        [Test]
+        public void DoubleDependencyConstructorAttributeTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            Assert.DoesNotThrow(() => {
+                Qux b = container.Resolve<Qux>();
+            });
+        }
+
+        [Test]
+        public void UnregisteredParametrizedDependencyConstructorAttributeTest()
+        {
+            SimpleContainer container = new SimpleContainer();
+
+            Assert.DoesNotThrow(() => {
+                Qux2 b = container.Resolve<Qux2>();
+            });
+        }
     }
 
     interface IFoo { }
@@ -171,5 +201,55 @@ namespace Tests
     public class Z
     {
         public Z(Z z) { }
+    }
+
+    public class Bar
+    {
+        
+        public Bar()
+        {
+            throw new InvalidOperationException();
+        }
+
+        [DependencyConstructor]
+        public Bar(object s)
+        {
+            
+        }
+    }
+
+    public class Qux
+    {
+        [DependencyConstructor]
+        public Qux()
+        {
+            throw new InvalidOperationException();
+        }
+
+        [DependencyConstructor]
+        public Qux(object s)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public Qux(object s, object x)
+        {
+            sbyte sb = new sbyte();
+        }
+    }
+
+    public class Qux2
+    {
+        public Qux2(Qux3 q3)
+        {
+
+        }
+    }
+
+    public class Qux3
+    {
+        public Qux3(object o)
+        {
+        }
     }
 }

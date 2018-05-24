@@ -109,11 +109,25 @@ namespace DIContainer
         public object CreateInstance(Type type, HashSet<Type> resolvedTypes)
         {
             ConstructorInfo[] constructors = type.GetConstructors();
+            ConstructorInfo constructor;
+
+            var dependencyConstructors = constructors.Where(c =>
+                c
+                .CustomAttributes
+                .Any(at => at.AttributeType == typeof(DependencyConstructor)));
+
+            if(dependencyConstructors.Count() == 1)
+            {
+                constructor = dependencyConstructors.First();
+                return InvokeConstructor(type, constructor, resolvedTypes);
+            }
+
             var maxConstructors = constructors.Where(ci => ci.GetParameters().Count() ==
                     constructors.Max(x => x.GetParameters().Count()));
             if (maxConstructors.Count() > 1)
                 throw new Exception("There is more than one constructor with the maximum number of parameters.");
-            ConstructorInfo constructor = maxConstructors.First();
+
+            constructor = maxConstructors.First();
 
             return InvokeConstructor(type, constructor, resolvedTypes);
         }
@@ -162,5 +176,10 @@ namespace DIContainer
             : base(message, inner)
         {
         }
+    }
+
+    public class DependencyConstructor : System.Attribute
+    {
+
     }
 }
